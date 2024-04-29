@@ -27,8 +27,8 @@ public:
 
 private slots:
 
-    void durationChanged(qint64 duration);  // Slot for duration change
-    void positionChanged(qint64 position);  // Slot for position change
+    void durationChanged(qint64 duration);
+    void positionChanged(qint64 position);
 
     void on_pushButton_Volume_clicked();
     void on_actionOpen_Audio_File_triggered();
@@ -43,7 +43,7 @@ private slots:
 
     void on_pushButton_SeekBack_clicked();
 
-    void on_horizontalSlider_Volume_valueChanged(int value);
+    void on_horizontalSlider_Volume_valueChanged(int Vvalue);
 
     void on_horizontalSlider_Audio_File_Duration_valueChanged(int value);
 
@@ -51,9 +51,9 @@ private:
     Ui::MainWindow *ui;
     bool IS_Muted = false;
     QMediaPlayer *MPlayer;
-    QAudioOutput *audioOutput;  // For volume control
+    QAudioOutput *audioOutput;
     qint64 Mduration;
 
-    bool isPlaying;
+    bool isPlaying = false;
 };
-#endif // MAINWINDOW_H
+#endif

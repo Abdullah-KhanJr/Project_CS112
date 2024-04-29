@@ -12,7 +12,7 @@ MainWindow::MainWindow(QWidget *parent)
     audioOutput = new QAudioOutput(this);
     MPlayer->setAudioOutput(audioOutput);
 
-    ui->pushButton_PlayPause->setIcon(style()->standardIcon(QStyle::SP_MediaPlay)); // Set default icon to play
+    ui->pushButton_PlayPause->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
     ui->pushButton_SeekBack->setIcon(style()->standardIcon(QStyle::SP_MediaSeekBackward));
     ui->pushButton_SeekForward->setIcon(style()->standardIcon(QStyle::SP_MediaSeekForward));
 
@@ -20,16 +20,13 @@ MainWindow::MainWindow(QWidget *parent)
     ui->pushButton_Volume->setIcon(style()->standardIcon(QStyle::SP_MediaVolume));
     ui->horizontalSlider_Volume->setValue(50);
 
-    // Connect signals for duration and position changes
     connect(MPlayer, &QMediaPlayer::durationChanged, this, &MainWindow::durationChanged);
     connect(MPlayer, &QMediaPlayer::positionChanged, this, &MainWindow::positionChanged);
 
     connect(ui->horizontalSlider_Audio_File_Duration, &QSlider::valueChanged, this, &MainWindow::on_horizontalSlider_Audio_File_Duration_valueChanged);
 
-    // Play music by default
     MPlayer->play();
-    isPlaying = true;
-    ui->pushButton_PlayPause->setIcon(style()->standardIcon(QStyle::SP_MediaPause)); // Set icon to pause since it's playing by default
+    ui->pushButton_PlayPause->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
 
 }
 
@@ -42,27 +39,27 @@ MainWindow::~MainWindow()
 
 void MainWindow::durationChanged(qint64 duration)
 {
-    Mduration = duration;  // Update total duration
-    QString format = (Mduration > 3600) ? "hh:mm:ss" : "mm:ss";  // Formatting
+    Mduration = duration;
+    QString format = (Mduration > 3600) ? "hh:mm:ss" : "mm:ss";
 
-    QTime totalTime(0, 0);  // Initialize time with zero
-    totalTime = totalTime.addSecs(duration / 1000);  // Convert milliseconds to seconds
+    QTime totalTime(0, 0);
+    totalTime = totalTime.addSecs(duration / 1000);
 
-    ui->label_Total_Duration->setText(totalTime.toString(format));  // Set total duration
+    ui->label_Total_Duration->setText(totalTime.toString(format));
 }
 
 void MainWindow::positionChanged(qint64 position)
 {
     if (Mduration > 0) {
-        int sliderValue = (position * 100) / Mduration;  // Convert position to percentage
-        ui->horizontalSlider_Audio_File_Duration->blockSignals(true);  // Block signals to avoid recursion
+        int sliderValue = (position * 100) / Mduration;
+        ui->horizontalSlider_Audio_File_Duration->blockSignals(true);
         ui->horizontalSlider_Audio_File_Duration->setValue(sliderValue);
-        ui->horizontalSlider_Audio_File_Duration->blockSignals(false);  // Unblock signals
+        ui->horizontalSlider_Audio_File_Duration->blockSignals(false);
     }
 
     QString format = (Mduration > 3600) ? "hh:mm:ss" : "mm:ss";
     QTime elapsedTime(0, 0);
-    elapsedTime = elapsedTime.addSecs(position / 1000);  // Convert to seconds
+    elapsedTime = elapsedTime.addSecs(position / 1000);
     ui->label_Elapsed_Duration->setText(elapsedTime.toString(format));
 }
 
@@ -72,11 +69,11 @@ void MainWindow::on_pushButton_Volume_clicked()
     if (!IS_Muted) {
         ui->pushButton_Volume->setIcon(style()->standardIcon(QStyle::SP_MediaVolumeMuted));
         IS_Muted = true;
-        audioOutput->setMuted(true);  // This mutes the audio
+        audioOutput->setMuted(true);
     } else {
         ui->pushButton_Volume->setIcon(style()->standardIcon(QStyle::SP_MediaVolume));
         IS_Muted = false;
-        audioOutput->setMuted(false);  // This unmutes the audio
+        audioOutput->setMuted(false);
     }
 }
 
@@ -93,19 +90,17 @@ void MainWindow::on_actionOpen_Audio_File_triggered()
 
 
 void MainWindow::on_pushButton_SeekForward_clicked() {
-    int currentSliderValue = ui->horizontalSlider_Audio_File_Duration->value();  // Get current slider value
-    int newSliderValue = currentSliderValue + 10;  // Shift forward by 10 percent
+    int currentSliderValue = ui->horizontalSlider_Audio_File_Duration->value();
+    int newSliderValue = currentSliderValue + 10;
 
-    // Ensure new value doesn't exceed 100 (max of slider)
     if (newSliderValue > 100) {
         newSliderValue = 100;
     }
 
-    ui->horizontalSlider_Audio_File_Duration->setValue(newSliderValue);  // Set new slider value
+    ui->horizontalSlider_Audio_File_Duration->setValue(newSliderValue);
 
-    // Set the new position in the media player
     if (Mduration > 0) {
-        qint64 newPosition = (newSliderValue * Mduration) / 100;  // Convert percentage to milliseconds
+        qint64 newPosition = (newSliderValue * Mduration) / 100;
         MPlayer->setPosition(newPosition);
     }
 }
@@ -119,14 +114,14 @@ void MainWindow::on_pushButton_Pause_clicked()
 
 void MainWindow::on_pushButton_PlayPause_clicked()
 {
-    if (isPlaying) {
-        MPlayer->pause();  // Pause music
-        ui->pushButton_PlayPause->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));  // Change icon to play
-        isPlaying = false;
-    } else {
-        MPlayer->play();  // Play music
-        ui->pushButton_PlayPause->setIcon(style()->standardIcon(QStyle::SP_MediaPause));  // Change icon to pause
+    if (!isPlaying) {
+        MPlayer->play();
+        ui->pushButton_PlayPause->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
         isPlaying = true;
+    } else {
+        MPlayer->pause();
+        ui->pushButton_PlayPause->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+        isPlaying = false;
     }
 }
 
@@ -138,35 +133,32 @@ void MainWindow::on_pushButton_Stop_clicked()
 
 
 void MainWindow::on_pushButton_SeekBack_clicked() {
-    int currentSliderValue = ui->horizontalSlider_Audio_File_Duration->value();  // Get current slider value
-    int newSliderValue = currentSliderValue - 10;  // Shift backward by 10 percent
+    int currentSliderValue = ui->horizontalSlider_Audio_File_Duration->value();
+    int newSliderValue = currentSliderValue - 10;
 
-    // Ensure new value doesn't go below 0
     if (newSliderValue < 0) {
         newSliderValue = 0;
     }
 
-    ui->horizontalSlider_Audio_File_Duration->setValue(newSliderValue);  // Set new slider value
+    ui->horizontalSlider_Audio_File_Duration->setValue(newSliderValue);
 
-    // Set the new position in the media player
     if (Mduration > 0) {
-        qint64 newPosition = (newSliderValue * Mduration) / 100;  // Convert percentage to milliseconds
+        qint64 newPosition = (newSliderValue * Mduration) / 100;
         MPlayer->setPosition(newPosition);
     }
 }
 
 void MainWindow::on_horizontalSlider_Volume_valueChanged(int value)
 {
-    // Normalize the slider value to 0.0 - 1.0 for volume control
     audioOutput->setVolume(value / 100.0);
 }
 
 void MainWindow::on_horizontalSlider_Audio_File_Duration_valueChanged(int value)
 {
-    // Convert slider value to position within the media duration
+
     if (Mduration > 0) {
-        qint64 newPosition = (value * Mduration) / 100;  // Convert to milliseconds based on the duration
-        MPlayer->setPosition(newPosition);  // Set the new position
+        qint64 newPosition = (value * Mduration) / 100;
+        MPlayer->setPosition(newPosition);
     }
 }
 
